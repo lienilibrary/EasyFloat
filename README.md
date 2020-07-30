@@ -14,7 +14,7 @@ implementation 'com.github.lienilibrary:EasyFloat:1.0.2'
 EasyFloat.init(this);
 ```
 
-### step 2: create layout
+### step 2: create a layout
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
