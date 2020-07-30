@@ -19,14 +19,14 @@ import com.lieni.library.easyfloat.utils.ViewUtils;
 import java.lang.ref.WeakReference;
 
 public class EasyFloat {
-    public static final String TAG="EasyFloat";
+    private static final String TAG="EasyFloat";
 
     private static volatile EasyFloat instance;
     private static Application application;
 
     private WeakReference <View> view;
-    private boolean alwaysShow=true;
-    public EasyFloat() {
+    private static boolean alwaysShow=true;
+    private EasyFloat() {
         SPUtils.init(application);
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
@@ -97,12 +97,6 @@ public class EasyFloat {
         SPUtils.saveLatestPoint("view",new Point(x,y));
     }
 
-
-
-
-//    private ViewGroup getDecorView(){
-//        return  (FrameLayout) getLatestActivity().getWindow().getDecorView();
-//    }
     public static View getView(){
         if(instance.view!=null){
             return instance.view.get();
@@ -110,7 +104,16 @@ public class EasyFloat {
             return null;
         }
     }
-    private void updateViewPosition(int x,int y){
+
+    public static void setAlwaysShow(boolean alwaysShow) {
+        EasyFloat.alwaysShow = alwaysShow;
+    }
+
+    public static void hide(){
+        instance.detachView(getView());
+    }
+
+    private void updateViewPosition(int x, int y){
         View view=getView();
         if(view!=null){
             view.setX(x);
@@ -128,15 +131,12 @@ public class EasyFloat {
         }
     }
     private void detachView(View view){
+        if(view==null) return;
         ViewGroup viewGroup=(ViewGroup) view.getParent();
         if(viewGroup!=null){
             SPUtils.saveLatestPoint("view",ViewUtils.getViewPoint(view));
             viewGroup.removeView(view);
         }
-//        ViewGroup decorView=getDecorView();
-////        if(ViewUtils.isViewExist(decorView,view)){
-////            decorView.removeView(view);
-////        }
     }
 
 }
