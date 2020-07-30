@@ -1,7 +1,7 @@
 # Download
 
 ```
-implementation 'com.github.lienilibrary:EasyFloat:1.0.1'
+implementation 'com.github.lienilibrary:EasyFloat:1.0.2'
 ```
 
 
@@ -33,7 +33,7 @@ EasyFloat.init(this);
 ### step 3: use in activity
 
 ```
-EasyFloat.setView(getWindow(),R.layout.view_float_video,0,0);
+EasyFloat.setView(getWindow(),R.layout.view_float_video);
 ```
 
 
