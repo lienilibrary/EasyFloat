@@ -5,37 +5,42 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.lieni.library.easyfloat.EasyFloat;
 import com.lieni.library.easyfloat.utils.ViewUtils;
 
 public class MainActivity extends AppCompatActivity {
-    private View view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.mainTest).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.navToNext).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MainActivity.this,TestActivity.class);
                 startActivity(intent);
             }
         });
-        findViewById(R.id.mainTest1).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.addView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 add();
+            }
+        });
+        findViewById(R.id.hideView).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hide();
             }
         });
         findViewById(R.id.getPosition).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Point point= ViewUtils.getViewPoint(EasyFloat.getView());
-                Log.i("ssssss","x:"+point.x+" "+"y:"+point.y);
+                Toast.makeText(getApplicationContext(),"x:"+point.x+" "+"y:"+point.y,Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -45,10 +50,9 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
     }
     private void add(){
-        if(view==null) {
-            view = getLayoutInflater().inflate(R.layout.view_test, null);
-        }
-        EasyFloat.setView(getWindow(), view,200,200);
-
+        EasyFloat.setView(getWindow(), R.layout.view_test,200,200);
+    }
+    private void hide(){
+        EasyFloat.hide();
     }
 }

@@ -19,7 +19,7 @@ import com.lieni.library.easyfloat.utils.ViewUtils;
 import java.lang.ref.WeakReference;
 
 public class EasyFloat {
-    private static final String TAG="EasyFloat";
+    private static final String TAG_VIEW="view";
 
     private static volatile EasyFloat instance;
     private static Application application;
@@ -31,7 +31,6 @@ public class EasyFloat {
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-                Log.i(TAG,"onActivityCreated");
             }
 
             @Override
@@ -64,7 +63,6 @@ public class EasyFloat {
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
-//                activities.remove(activity);
                 if(!alwaysShow){
                     if (view!=null){
                         detachView(getView());
@@ -88,18 +86,25 @@ public class EasyFloat {
         }
         return instance;
     }
+    public static void setView(Window window,int layoutId){
+        setView(window,layoutId);
+    }
     public static void setView(Window window,int layoutId,int x,int y){
+        setView(window,layoutId,x,y,true);
+    }
+    public static void setView(Window window,int layoutId,int x,int y,boolean alwaysShow){
         View view=window.getLayoutInflater().inflate(layoutId,(ViewGroup) window.getDecorView(),false);
-        setView(window,view,x,y);
+        setView(window,view,x,y,alwaysShow);
     }
 
-    public static void setView(Window window, View view,int x,int y){
+    public static void setView(Window window, View view,int x,int y,boolean alwaysShow){
+        EasyFloat.alwaysShow=alwaysShow;
         if(getInstance().view!=null){
             getInstance().detachView(getView());
         }
         getInstance().view=new WeakReference<>(view);
         getInstance().attachView(window,view,new Point(x,y));
-        SPUtils.saveLatestPoint("view",new Point(x,y));
+        SPUtils.saveLatestPoint(TAG_VIEW,new Point(x,y));
     }
 
     public static View getView(){
@@ -115,7 +120,19 @@ public class EasyFloat {
     }
 
     public static void hide(){
+        alwaysShow=false;
         instance.detachView(getView());
+    }
+    public static void show(Window window,boolean alwaysShow){
+        EasyFloat.alwaysShow=alwaysShow;
+        View view=getView();
+        if(view!=null){
+            instance.detachView(view);
+            instance.attachView(window,view,SPUtils.getLatestPoint(TAG_VIEW));
+        }
+    }
+    public static void show(Window window){
+        show(window,true);
     }
 
     private void updateViewPosition(int x, int y){
@@ -127,7 +144,6 @@ public class EasyFloat {
     }
     private void attachView(Window window, View view, Point point){
         ViewGroup decorView=(FrameLayout)  window.getDecorView();
-        Log.i(TAG,decorView.getChildCount()+"");
         if(!ViewUtils.isViewExist(decorView,view)){
             FrameLayout.LayoutParams params=new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT);
             view.setX(point.x);
@@ -139,7 +155,7 @@ public class EasyFloat {
         if(view==null) return;
         ViewGroup viewGroup=(ViewGroup) view.getParent();
         if(viewGroup!=null){
-            SPUtils.saveLatestPoint("view",ViewUtils.getViewPoint(view));
+            SPUtils.saveLatestPoint(TAG_VIEW,ViewUtils.getViewPoint(view));
             viewGroup.removeView(view);
         }
     }

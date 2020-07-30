@@ -8,26 +8,32 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/mainTest"
+        android:id="@+id/navToNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="navToNext"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        android:gravity="center"/>
     <TextView
-        android:id="@+id/mainTest1"
+        android:id="@+id/addView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="addView"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        android:gravity="center"/>
+    <TextView
+        android:id="@+id/hideView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="hideView"
+        android:padding="10dp"
+        android:gravity="center"/>
     <TextView
         android:id="@+id/getPosition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="getPosition"
-        android:padding="10dp"/>
-    <com.lieni.library.easyfloat.view.FloatView
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        android:background="@color/colorAccent"/>
+        android:padding="10dp"
+        android:gravity="center"/>
 
 </LinearLayout>
