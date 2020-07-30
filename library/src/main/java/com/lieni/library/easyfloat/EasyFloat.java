@@ -88,6 +88,11 @@ public class EasyFloat {
         }
         return instance;
     }
+    public static void setView(Window window,int layoutId,int x,int y){
+        View view=window.getLayoutInflater().inflate(layoutId,(ViewGroup) window.getDecorView(),false);
+        setView(window,view,x,y);
+    }
+
     public static void setView(Window window, View view,int x,int y){
         if(getInstance().view!=null){
             getInstance().detachView(getView());
