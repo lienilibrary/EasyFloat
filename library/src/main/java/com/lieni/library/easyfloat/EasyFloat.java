@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -17,12 +16,15 @@ import com.lieni.library.easyfloat.utils.SPUtils;
 import com.lieni.library.easyfloat.utils.ViewUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EasyFloat {
     private static final String TAG_VIEW="view";
 
     private static volatile EasyFloat instance;
     private static Application application;
+    private static Map<String,Object> data=new HashMap<>();
 
     private WeakReference <View> view;
     private static boolean alwaysShow=true;
@@ -123,6 +125,16 @@ public class EasyFloat {
         alwaysShow=false;
         instance.detachView(getView());
     }
+    public static void destroy(boolean clearData){
+        hide();
+        instance.view=null;
+        if(clearData){
+            data.clear();
+        }
+    }
+    public static void destroy(){
+        destroy(true);
+    }
     public static void show(Window window,boolean alwaysShow){
         EasyFloat.alwaysShow=alwaysShow;
         View view=getView();
@@ -133,6 +145,22 @@ public class EasyFloat {
     }
     public static void show(Window window){
         show(window,true);
+    }
+
+    public static void putData(String key,Object value){
+        data.put(key,value);
+    }
+    public static Object getData(String key){
+        return data.get(key);
+    }
+    public static <T> T getData(String key,Class<T> clz){
+        Object object=data.get(key);
+        if(clz.isInstance(object)){
+            return clz.cast(object);
+        }else {
+            return null;
+        }
+
     }
 
     private void updateViewPosition(int x, int y){
