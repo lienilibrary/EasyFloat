@@ -51,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
     }
     private void add(){
         EasyFloat.setView(getWindow(), R.layout.view_test,200,200);
+        View view=EasyFloat.getView();
+        if(view!=null){
+            view.findViewById(R.id.tvText).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Point point= ViewUtils.getViewPoint(EasyFloat.getView());
+                    Toast.makeText(getApplicationContext(),"x:"+point.x+" "+"y:"+point.y,Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
     private void hide(){
         EasyFloat.hide();

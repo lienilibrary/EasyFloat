@@ -2,6 +2,7 @@ package com.lieni.library.easyfloat.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -35,10 +36,52 @@ public class FloatView extends FrameLayout {
     private int parentWidth;
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        Log.i("sssssssss","dispatchTouchEvent");
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+//                pressedTime=System.currentTimeMillis();
+                Log.i("sssssssss","ACTION_DOWN");
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.i("sssssssss","ACTION_UP");
+                break;
+        }
+        handleEvent(ev);
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        Log.i("sssssssss","onInterceptTouchEvent");
+
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    private void handleEvent(MotionEvent event){
         int rawX = (int) event.getRawX();
         int rawY = (int) event.getRawY();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                Log.i("sssssssss","onTouchEvent ACTION_DOWN");
                 setPressed(true);
                 isDrag = false;
                 getParent().requestDisallowInterceptTouchEvent(true);
@@ -74,7 +117,7 @@ public class FloatView extends FrameLayout {
                 lastY = rawY;
                 break;
             case MotionEvent.ACTION_UP:
-                if (!isNotDrag()) {
+                if (isDrag) {
                     //恢复按压效果
                     setPressed(false);
                     boolean xLeftOver=getX()<0;
@@ -109,21 +152,5 @@ public class FloatView extends FrameLayout {
             default:
                 break;
         }
-        //如果是拖拽则消s耗事件，否则正常传递即可。
-        return !isNotDrag() || super.onTouchEvent(event);
-
-    }
-    private boolean isNotDrag() {
-        return !isDrag && (getX() == 0|| (getX() == parentWidth - getWidth()));
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }
