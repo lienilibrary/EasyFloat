@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
     }
     private void add(){
-        EasyFloat.setView(getWindow(), R.layout.view_test,200,200);
+        EasyFloat.setView(getWindow(), R.layout.view_test,200,200,true,false);
         View view=EasyFloat.getView();
         if(view!=null){
             view.findViewById(R.id.tvText).setOnClickListener(new View.OnClickListener() {

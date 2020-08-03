@@ -92,20 +92,20 @@ public class EasyFloat {
         setView(window,layoutId);
     }
     public static void setView(Window window,int layoutId,int x,int y){
-        setView(window,layoutId,x,y,true);
+        setView(window,layoutId,x,y,true,true);
     }
-    public static void setView(Window window,int layoutId,int x,int y,boolean alwaysShow){
+    public static void setView(Window window,int layoutId,int x,int y,boolean alwaysShow,boolean attach){
         View view=window.getLayoutInflater().inflate(layoutId,(ViewGroup) window.getDecorView(),false);
-        setView(window,view,x,y,alwaysShow);
+        setView(window,view,x,y,alwaysShow,attach);
     }
 
-    public static void setView(Window window, View view,int x,int y,boolean alwaysShow){
+    public static void setView(Window window, View view,int x,int y,boolean alwaysShow,boolean attach){
         EasyFloat.alwaysShow=alwaysShow;
         if(getInstance().view!=null){
             getInstance().detachView(getView());
         }
         getInstance().view=new WeakReference<>(view);
-        getInstance().attachView(window,view,new Point(x,y));
+        if(attach) getInstance().attachView(window,view,new Point(x,y));
         SPUtils.saveLatestPoint(TAG_VIEW,new Point(x,y));
     }
 
@@ -172,7 +172,7 @@ public class EasyFloat {
     }
     private void attachView(Window window, View view, Point point){
         ViewGroup decorView=(FrameLayout)  window.getDecorView();
-        if(!ViewUtils.isViewExist(decorView,view)){
+        if(view!=null&&!ViewUtils.isViewExist(decorView,view)){
             FrameLayout.LayoutParams params=new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT);
             view.setX(point.x);
             view.setY(point.y);
