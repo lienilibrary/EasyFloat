@@ -6,6 +6,7 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.Window;
 import android.widget.FrameLayout;
 
@@ -17,14 +18,17 @@ import com.lieni.library.easyfloat.utils.ViewUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class EasyFloat {
     private static final String TAG_VIEW="view";
 
     private static volatile EasyFloat instance;
     private static Application application;
-    private static Map<String,Object> data=new HashMap<>();
+    private static Map<String,Object> data=new HashMap<>();//缓存临时数据
+    private static Set<Class> invalidActivities=new HashSet<>();//缓存不显示的activity
 
     private WeakReference <View> view;
     private static boolean alwaysShow=true;
@@ -38,7 +42,7 @@ public class EasyFloat {
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
                 if(alwaysShow){
-                    if(view!=null){
+                    if(view!=null&&!isActivityInvalid(activity)&&!isViewExist(activity)){
                         detachView(getView());
                         attachView(activity.getWindow(),getView(),SPUtils.getLatestPoint("view"));
                     }
@@ -130,6 +134,7 @@ public class EasyFloat {
         instance.view=null;
         if(clearData){
             data.clear();
+            invalidActivities.clear();
         }
     }
     public static void destroy(){
@@ -147,6 +152,42 @@ public class EasyFloat {
         show(window,true);
     }
 
+    public static void addInvalidActivity(Class clz){
+        invalidActivities.add(clz);
+    }
+    public static void removeInvalidActivity(Class clz){
+        invalidActivities.remove(clz);
+    }
+
+    /**
+     * activity 该activity是否不显示浮窗
+     * @param activity
+     * @return
+     */
+    public static boolean isActivityInvalid(Activity activity){
+        for (Class clz:invalidActivities){
+            if(clz.isInstance(activity)){
+                return true;
+            }
+        }
+        return false;
+    }
+    public static boolean isViewExist(Activity activity){
+        if(instance.view!=null){
+            ViewParent parent= instance.view.get().getParent();
+            View decorView=activity.getWindow().getDecorView();
+            if(parent instanceof FrameLayout&&decorView instanceof FrameLayout){
+                FrameLayout parentContainer=(FrameLayout) parent;
+                FrameLayout decorContainer=(FrameLayout) decorView;
+                return parentContainer==decorContainer;
+            }
+            else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
     public static void putData(String key,Object value){
         data.put(key,value);
     }

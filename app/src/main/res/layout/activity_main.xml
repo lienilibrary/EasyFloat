@@ -29,10 +29,10 @@
         android:padding="10dp"
         android:gravity="center"/>
     <TextView
-        android:id="@+id/getPosition"
+        android:id="@+id/showDialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="getPosition"
+        android:text="showDialog"
         android:padding="10dp"
         android:gravity="center"/>
 

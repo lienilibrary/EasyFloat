@@ -1,11 +1,13 @@
 package com.lieni.easyfloat;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.lieni.library.easyfloat.EasyFloat;
@@ -36,11 +38,12 @@ public class MainActivity extends AppCompatActivity {
                 hide();
             }
         });
-        findViewById(R.id.getPosition).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.showDialog).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Point point= ViewUtils.getViewPoint(EasyFloat.getView());
-                Toast.makeText(getApplicationContext(),"x:"+point.x+" "+"y:"+point.y,Toast.LENGTH_SHORT).show();
+                View view=getLayoutInflater().inflate(R.layout.view_test,(FrameLayout)getWindow().getDecorView(),false);
+                AlertDialog dialog=new  AlertDialog.Builder(v.getContext()).setView(view).create();
+                dialog.show();
             }
         });
     }
@@ -50,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
     }
     private void add(){
-        EasyFloat.setView(getWindow(), R.layout.view_test,200,200,true,false);
+        EasyFloat.addInvalidActivity(Test2Activity.class);
+        EasyFloat.setView(getWindow(), R.layout.view_test,200,200,true,true);
         View view=EasyFloat.getView();
         if(view!=null){
             view.findViewById(R.id.tvText).setOnClickListener(new View.OnClickListener() {
