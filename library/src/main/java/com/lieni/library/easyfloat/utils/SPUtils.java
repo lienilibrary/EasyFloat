@@ -1,6 +1,5 @@
 package com.lieni.library.easyfloat.utils;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;

@@ -16,7 +16,7 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
         TextView tvTest=findViewById(R.id.tvTest);
-        tvTest.setText("TEST1");
+        tvTest.setText("nav to test2");
         tvTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

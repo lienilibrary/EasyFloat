@@ -29,9 +29,15 @@ public class EasyFloat {
     private static Application application;
     private static Map<String,Object> data=new HashMap<>();//缓存临时数据
     private static Set<Class> invalidActivities=new HashSet<>();//缓存不显示的activity
+    private static Set<String> invalidActivityNames=new HashSet<>();//缓存不显示的activity名称
+
+    private static Set<Class> validActivities=new HashSet<>();//缓存只显示的activity
+    private static Set<String> validActivityNames=new HashSet<>();//缓存只显示的activity名称
+
+
+    private static boolean onlyValidActivityShow=false;
 
     private WeakReference <View> view;
-    private static boolean alwaysShow=true;
     private EasyFloat() {
         SPUtils.init(application);
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
@@ -41,11 +47,9 @@ public class EasyFloat {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-                if(alwaysShow){
-                    if(view!=null&&!isActivityInvalid(activity)&&!isViewExist(activity)){
-                        detachView(getView());
-                        attachView(activity.getWindow(),getView(),SPUtils.getLatestPoint("view"));
-                    }
+                if(view!=null&&isActivityValid(activity)&&!isViewExist(activity)){
+                    detachView(getView());
+                    attachView(activity.getWindow(),getView(),SPUtils.getLatestPoint("view"));
                 }
             }
 
@@ -69,10 +73,8 @@ public class EasyFloat {
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
-                if(!alwaysShow){
-                    if (view!=null){
-                        detachView(getView());
-                    }
+                if(isViewExist(activity)){
+                    detachView(getView());
                 }
             }
         });
@@ -81,6 +83,7 @@ public class EasyFloat {
     public static void init(Application app){
         application=app;
         getInstance();
+        invalidActivityNames.add("GrantPermissionsActivity");//忽略系统授权页面
     }
     private static EasyFloat getInstance(){
         if(instance==null){
@@ -96,15 +99,14 @@ public class EasyFloat {
         setView(window,layoutId);
     }
     public static void setView(Window window,int layoutId,int x,int y){
-        setView(window,layoutId,x,y,true,true);
+        setView(window,layoutId,x,y,true);
     }
-    public static void setView(Window window,int layoutId,int x,int y,boolean alwaysShow,boolean attach){
+    public static void setView(Window window,int layoutId,int x,int y,boolean attach){
         View view=window.getLayoutInflater().inflate(layoutId,(ViewGroup) window.getDecorView(),false);
-        setView(window,view,x,y,alwaysShow,attach);
+        setView(window,view,x,y,attach);
     }
 
-    public static void setView(Window window, View view,int x,int y,boolean alwaysShow,boolean attach){
-        EasyFloat.alwaysShow=alwaysShow;
+    public static void setView(Window window, View view,int x,int y,boolean attach){
         if(getInstance().view!=null){
             getInstance().detachView(getView());
         }
@@ -121,12 +123,7 @@ public class EasyFloat {
         }
     }
 
-    public static void setAlwaysShow(boolean alwaysShow) {
-        EasyFloat.alwaysShow = alwaysShow;
-    }
-
     public static void hide(){
-        alwaysShow=false;
         instance.detachView(getView());
     }
     public static void destroy(boolean clearData){
@@ -134,29 +131,46 @@ public class EasyFloat {
         instance.view=null;
         if(clearData){
             data.clear();
-            invalidActivities.clear();
         }
     }
     public static void destroy(){
         destroy(true);
     }
-    public static void show(Window window,boolean alwaysShow){
-        EasyFloat.alwaysShow=alwaysShow;
+    public static void show(Window window){
         View view=getView();
         if(view!=null){
             instance.detachView(view);
             instance.attachView(window,view,SPUtils.getLatestPoint(TAG_VIEW));
         }
     }
-    public static void show(Window window){
-        show(window,true);
-    }
 
     public static void addInvalidActivity(Class clz){
         invalidActivities.add(clz);
     }
+
     public static void removeInvalidActivity(Class clz){
         invalidActivities.remove(clz);
+    }
+    public static void addInvalidActivityName(String name){
+        invalidActivityNames.add(name);
+    }
+    public static void removeInvalidActivityName(String name){
+        invalidActivityNames.remove(name);
+    }
+
+    public static void addValidActivity(Class clz){
+        validActivities.add(clz);
+    }
+
+    public static void removeValidActivity(Class clz){
+        validActivities.remove(clz);
+    }
+
+    public static void addValidActivityName(String name){
+        validActivityNames.add(name);
+    }
+    public static void removeValidActivityName(String name){
+        validActivityNames.remove(name);
     }
 
     /**
@@ -164,16 +178,42 @@ public class EasyFloat {
      * @param activity
      * @return
      */
-    public static boolean isActivityInvalid(Activity activity){
-        for (Class clz:invalidActivities){
-            if(clz.isInstance(activity)){
-                return true;
+    public static boolean isActivityValid(Activity activity){
+        if(onlyValidActivityShow){
+            for (String className : validActivityNames) {
+                if (className.equals(activity.getLocalClassName())) {
+                    return true;
+                }
             }
+            for (Class clz : validActivities) {
+                if (clz.isInstance(activity)) {
+                    return true;
+                }
+            }
+            return false;
+        }else {
+            for (String className : invalidActivityNames) {
+                if (className.equals(activity.getLocalClassName())) {
+                    return false;
+                }
+            }
+            for (Class clz : invalidActivities) {
+                if (clz.isInstance(activity)) {
+                    return false;
+                }
+            }
+            return true;
         }
-        return false;
     }
+
+    /**
+     * view是否已经存在activity中
+     * @param activity
+     * @return
+     */
+
     public static boolean isViewExist(Activity activity){
-        if(instance.view!=null){
+        if(instance.view!=null&&instance.view.get()!=null){
             ViewParent parent= instance.view.get().getParent();
             View decorView=activity.getWindow().getDecorView();
             if(parent instanceof FrameLayout&&decorView instanceof FrameLayout){
@@ -188,7 +228,16 @@ public class EasyFloat {
             return false;
         }
     }
-    public static void putData(String key,Object value){
+
+    public static boolean isOnlyValidActivityShow() {
+        return onlyValidActivityShow;
+    }
+
+    public static void setOnlyValidActivityShow(boolean onlyValidActivityShow) {
+        EasyFloat.onlyValidActivityShow = onlyValidActivityShow;
+    }
+
+    public static void putData(String key, Object value){
         data.put(key,value);
     }
     public static Object getData(String key){

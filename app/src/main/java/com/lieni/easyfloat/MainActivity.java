@@ -53,8 +53,10 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
     }
     private void add(){
-        EasyFloat.addInvalidActivity(Test2Activity.class);
-        EasyFloat.setView(getWindow(), R.layout.view_test,200,200,true,true);
+        EasyFloat.setOnlyValidActivityShow(true);
+        EasyFloat.addValidActivityName("Test2Activity");
+//        EasyFloat.addInvalidActivityName("Test2Activity");
+        EasyFloat.setView(getWindow(), R.layout.view_test,200,200,false);
         View view=EasyFloat.getView();
         if(view!=null){
             view.findViewById(R.id.tvText).setOnClickListener(new View.OnClickListener() {
