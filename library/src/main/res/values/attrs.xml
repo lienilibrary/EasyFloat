@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <declare-styleable name="FloatView">
+        <attr name="float_marginStart" format="dimension" />
+        <attr name="float_marginEnd" format="dimension" />
+        <attr name="float_marginTop" format="dimension" />
+        <attr name="float_marginBottom" format="dimension" />
+        <attr name="float_marginHorizontal" format="dimension" />
+        <attr name="float_marginVertical" format="dimension" />
+        <attr name="float_margin" format="dimension" />
+    </declare-styleable>
+</resources>
