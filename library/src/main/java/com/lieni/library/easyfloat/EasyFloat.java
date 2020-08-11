@@ -62,8 +62,8 @@ public class EasyFloat {
             public void onActivityStarted(@NonNull Activity activity) {
                 if (view != null && view.get() != null && isActivityValid(activity) && !isViewExist(activity)) {
                     if (onFloatStateChanged != null) {
-                        boolean go = onFloatStateChanged.beforeShow(activity, view.get());
-                        if (!go) return;
+                        boolean intercept = onFloatStateChanged.beforeShow(activity, view.get());
+                        if (intercept) return;
                     }
                     detachView(getView());
                     attachView(activity.getWindow(), getView(), SPUtils.getLatestPoint("view"));
@@ -337,7 +337,7 @@ public class EasyFloat {
 
     public interface OnFloatStateChanged {
         /**
-         * @return true 继续进行;false 拦截
+         * @return false 继续进行;true 拦截
          */
         boolean beforeShow(Activity activity, View view);
 
