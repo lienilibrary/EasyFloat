@@ -24,29 +24,33 @@ import java.util.Map;
 import java.util.Set;
 
 public class EasyFloat {
-    private static final String TAG_VIEW="view";
+    private static final String TAG_VIEW = "view";
 
     private static volatile EasyFloat instance;
     private static Application application;
     //缓存临时数据
-    private static Map<String,Object> data=new HashMap<>();
+    private static Map<String, Object> data = new HashMap<>();
     //缓存不显示的activity
-    private static Set<Class> invalidActivities=new HashSet<>();
+    private static Set<Class> invalidActivities = new HashSet<>();
     //缓存不显示的activity名称
-    private static Set<String> invalidActivityNames=new HashSet<>();
+    private static Set<String> invalidActivityNames = new HashSet<>();
 
     //缓存只显示的activity
-    private static Set<Class> validActivities=new HashSet<>();
+    private static Set<Class> validActivities = new HashSet<>();
     //缓存只显示的activity名称
-    private static Set<String> validActivityNames=new HashSet<>();
+    private static Set<String> validActivityNames = new HashSet<>();
 
     //只在已设置的activity显示
-    private static boolean onlyValidActivityShow=false;
+    private static boolean onlyValidActivityShow = false;
 
     //已显示的时候不熄屏
-    private static boolean keepScreenOn=false;
+    private static boolean keepScreenOn = false;
 
-    private WeakReference <View> view;
+    //状态监听
+    private static OnFloatStateChanged onFloatStateChanged;
+
+    private WeakReference<View> view;
+
     private EasyFloat() {
         SPUtils.init(application);
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
@@ -56,12 +60,20 @@ public class EasyFloat {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-                if(view!=null&&isActivityValid(activity)&&!isViewExist(activity)){
+                if (view != null && view.get() != null && isActivityValid(activity) && !isViewExist(activity)) {
+                    if (onFloatStateChanged != null) {
+                        boolean go = onFloatStateChanged.beforeShow(activity, view.get());
+                        if (!go) return;
+                    }
                     detachView(getView());
-                    attachView(activity.getWindow(),getView(),SPUtils.getLatestPoint("view"));
+                    attachView(activity.getWindow(), getView(), SPUtils.getLatestPoint("view"));
 
-                    if(keepScreenOn){
+                    if (keepScreenOn && !activity.isFinishing()) {
                         activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
+
+                    if (onFloatStateChanged != null) {
+                        onFloatStateChanged.afterShow(view.get());
                     }
                 }
             }
@@ -86,113 +98,93 @@ public class EasyFloat {
 
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
-                if(isViewExist(activity)){
+                if (isViewExist(activity)) {
                     detachView(getView());
                 }
             }
         });
     }
 
-    public static void init(Application app){
-        application=app;
+    public static void init(Application app) {
+        application = app;
         getInstance();
         invalidActivityNames.add("GrantPermissionsActivity");//忽略系统授权页面
     }
-    private static EasyFloat getInstance(){
-        if(instance==null){
-            synchronized (EasyFloat.class){
-                if(instance==null){
-                    instance=new EasyFloat();
+
+    private static EasyFloat getInstance() {
+        if (instance == null) {
+            synchronized (EasyFloat.class) {
+                if (instance == null) {
+                    instance = new EasyFloat();
                 }
             }
         }
         return instance;
     }
-    public static void setView(Window window,int layoutId){
-        setView(window,layoutId);
-    }
-    public static void setView(Window window,int layoutId,int x,int y){
-        setView(window,layoutId,x,y,true);
-    }
-    public static void setView(Window window,int layoutId,int x,int y,boolean attach){
-        View view=window.getLayoutInflater().inflate(layoutId,(ViewGroup) window.getDecorView(),false);
-        setView(window,view,x,y,attach);
+
+    public static void setView(Window window, int layoutId) {
+        setView(window, layoutId);
     }
 
-    public static void setView(Window window, View view,int x,int y,boolean attach){
-        if(getInstance().view!=null){
+    public static void setView(Window window, int layoutId, int x, int y) {
+        setView(window, layoutId, x, y, true);
+    }
+
+    public static void setView(Window window, int layoutId, int x, int y, boolean attach) {
+        View view = window.getLayoutInflater().inflate(layoutId, (ViewGroup) window.getDecorView(), false);
+        setView(window, view, x, y, attach);
+    }
+
+    public static void setView(Window window, View view, int x, int y, boolean attach) {
+        if (getInstance().view != null) {
             getInstance().detachView(getView());
         }
-        getInstance().view=new WeakReference<>(view);
-        if(attach) getInstance().attachView(window,view,new Point(x,y));
-        SPUtils.saveLatestPoint(TAG_VIEW,new Point(x,y));
+        getInstance().view = new WeakReference<>(view);
+        if (attach) getInstance().attachView(window, view, new Point(x, y));
+        SPUtils.saveLatestPoint(TAG_VIEW, new Point(x, y));
     }
 
-    public static View getView(){
-        if(instance.view!=null){
+    public static View getView() {
+        if (instance.view != null) {
             return instance.view.get();
-        }else{
+        } else {
             return null;
         }
     }
 
-    public static void hide(){
+    public static void hide() {
         instance.detachView(getView());
     }
-    public static void destroy(boolean clearData){
+
+    public static void destroy(boolean clearData) {
         hide();
-        instance.view=null;
-        if(clearData){
+        instance.view = null;
+        if (clearData) {
             data.clear();
+            onFloatStateChanged = null;
         }
     }
-    public static void destroy(){
+
+    public static void destroy() {
         destroy(true);
     }
-    public static void show(Window window){
-        View view=getView();
-        if(view!=null){
+
+    public static void show(Window window) {
+        View view = getView();
+        if (view != null) {
             instance.detachView(view);
-            instance.attachView(window,view,SPUtils.getLatestPoint(TAG_VIEW));
+            instance.attachView(window, view, SPUtils.getLatestPoint(TAG_VIEW));
         }
-    }
-
-    public static void addInvalidActivity(Class clz){
-        invalidActivities.add(clz);
-    }
-
-    public static void removeInvalidActivity(Class clz){
-        invalidActivities.remove(clz);
-    }
-    public static void addInvalidActivityName(String name){
-        invalidActivityNames.add(name);
-    }
-    public static void removeInvalidActivityName(String name){
-        invalidActivityNames.remove(name);
-    }
-
-    public static void addValidActivity(Class clz){
-        validActivities.add(clz);
-    }
-
-    public static void removeValidActivity(Class clz){
-        validActivities.remove(clz);
-    }
-
-    public static void addValidActivityName(String name){
-        validActivityNames.add(name);
-    }
-    public static void removeValidActivityName(String name){
-        validActivityNames.remove(name);
     }
 
     /**
      * activity 该activity是否不显示浮窗
+     *
      * @param activity
      * @return
      */
-    public static boolean isActivityValid(Activity activity){
-        if(onlyValidActivityShow){
+    public static boolean isActivityValid(Activity activity) {
+        if (onlyValidActivityShow) {
             for (String className : validActivityNames) {
                 if (className.equals(activity.getLocalClassName())) {
                     return true;
@@ -204,7 +196,7 @@ public class EasyFloat {
                 }
             }
             return false;
-        }else {
+        } else {
             for (String className : invalidActivityNames) {
                 if (className.equals(activity.getLocalClassName())) {
                     return false;
@@ -221,24 +213,51 @@ public class EasyFloat {
 
     /**
      * view是否已经存在activity中
+     *
      * @param activity
      * @return
      */
 
-    public static boolean isViewExist(Activity activity){
-        if(instance.view!=null&&instance.view.get()!=null){
-            ViewParent parent= instance.view.get().getParent();
-            View decorView=activity.getWindow().getDecorView();
-            if(parent instanceof FrameLayout&&decorView instanceof FrameLayout){
-                FrameLayout parentContainer=(FrameLayout) parent;
-                FrameLayout decorContainer=(FrameLayout) decorView;
-                return parentContainer==decorContainer;
-            }
-            else{
+    public static boolean isViewExist(Activity activity) {
+        if (instance.view != null && instance.view.get() != null) {
+            ViewParent parent = instance.view.get().getParent();
+            View decorView = activity.getWindow().getDecorView();
+            if (parent instanceof FrameLayout && decorView instanceof FrameLayout) {
+                FrameLayout parentContainer = (FrameLayout) parent;
+                FrameLayout decorContainer = (FrameLayout) decorView;
+                return parentContainer == decorContainer;
+            } else {
                 return false;
             }
-        }else{
+        } else {
             return false;
+        }
+    }
+
+    private void updateViewPosition(int x, int y) {
+        View view = getView();
+        if (view != null) {
+            view.setX(x);
+            view.setY(y);
+        }
+    }
+
+    private void attachView(Window window, View view, Point point) {
+        ViewGroup decorView = (FrameLayout) window.getDecorView();
+        if (view != null && !ViewUtils.isViewExist(decorView, view)) {
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+            view.setX(point.x);
+            view.setY(point.y);
+            decorView.addView(view, params);
+        }
+    }
+
+    private void detachView(View view) {
+        if (view == null) return;
+        ViewGroup viewGroup = (ViewGroup) view.getParent();
+        if (viewGroup != null) {
+            SPUtils.saveLatestPoint(TAG_VIEW, ViewUtils.getViewPoint(view));
+            viewGroup.removeView(view);
         }
     }
 
@@ -258,45 +277,72 @@ public class EasyFloat {
         EasyFloat.keepScreenOn = keepScreenOn;
     }
 
-    public static void putData(String key, Object value){
-        data.put(key,value);
+    public static void putData(String key, Object value) {
+        data.put(key, value);
     }
-    public static Object getData(String key){
+
+    public static Object getData(String key) {
         return data.get(key);
     }
-    public static <T> T getData(String key,Class<T> clz){
-        Object object=data.get(key);
-        if(clz.isInstance(object)){
+
+    public static <T> T getData(String key, Class<T> clz) {
+        Object object = data.get(key);
+        if (clz.isInstance(object)) {
             return clz.cast(object);
-        }else {
+        } else {
             return null;
         }
 
     }
 
-    private void updateViewPosition(int x, int y){
-        View view=getView();
-        if(view!=null){
-            view.setX(x);
-            view.setY(y);
-        }
+    public static void addInvalidActivity(Class clz) {
+        invalidActivities.add(clz);
     }
-    private void attachView(Window window, View view, Point point){
-        ViewGroup decorView=(FrameLayout)  window.getDecorView();
-        if(view!=null&&!ViewUtils.isViewExist(decorView,view)){
-            FrameLayout.LayoutParams params=new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,FrameLayout.LayoutParams.WRAP_CONTENT);
-            view.setX(point.x);
-            view.setY(point.y);
-            decorView.addView(view,params);
-        }
+
+    public static void removeInvalidActivity(Class clz) {
+        invalidActivities.remove(clz);
     }
-    private void detachView(View view){
-        if(view==null) return;
-        ViewGroup viewGroup=(ViewGroup) view.getParent();
-        if(viewGroup!=null){
-            SPUtils.saveLatestPoint(TAG_VIEW,ViewUtils.getViewPoint(view));
-            viewGroup.removeView(view);
-        }
+
+    public static void addInvalidActivityName(String name) {
+        invalidActivityNames.add(name);
+    }
+
+    public static void removeInvalidActivityName(String name) {
+        invalidActivityNames.remove(name);
+    }
+
+    public static void addValidActivity(Class clz) {
+        validActivities.add(clz);
+    }
+
+    public static void removeValidActivity(Class clz) {
+        validActivities.remove(clz);
+    }
+
+    public static void addValidActivityName(String name) {
+        validActivityNames.add(name);
+    }
+
+    public static void removeValidActivityName(String name) {
+        validActivityNames.remove(name);
+    }
+
+    public static OnFloatStateChanged getOnFloatStateChanged() {
+        return onFloatStateChanged;
+    }
+
+    public static void setOnFloatStateChanged(OnFloatStateChanged onFloatStateChanged) {
+        EasyFloat.onFloatStateChanged = onFloatStateChanged;
+    }
+
+    public interface OnFloatStateChanged {
+        /**
+         * @return true 继续进行;false 拦截
+         */
+        boolean beforeShow(Activity activity, View view);
+
+        void afterShow(View view);
+
     }
 
 }
