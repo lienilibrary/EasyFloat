@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -27,15 +28,23 @@ public class EasyFloat {
 
     private static volatile EasyFloat instance;
     private static Application application;
-    private static Map<String,Object> data=new HashMap<>();//缓存临时数据
-    private static Set<Class> invalidActivities=new HashSet<>();//缓存不显示的activity
-    private static Set<String> invalidActivityNames=new HashSet<>();//缓存不显示的activity名称
+    //缓存临时数据
+    private static Map<String,Object> data=new HashMap<>();
+    //缓存不显示的activity
+    private static Set<Class> invalidActivities=new HashSet<>();
+    //缓存不显示的activity名称
+    private static Set<String> invalidActivityNames=new HashSet<>();
 
-    private static Set<Class> validActivities=new HashSet<>();//缓存只显示的activity
-    private static Set<String> validActivityNames=new HashSet<>();//缓存只显示的activity名称
+    //缓存只显示的activity
+    private static Set<Class> validActivities=new HashSet<>();
+    //缓存只显示的activity名称
+    private static Set<String> validActivityNames=new HashSet<>();
 
-
+    //只在已设置的activity显示
     private static boolean onlyValidActivityShow=false;
+
+    //已显示的时候不熄屏
+    private static boolean keepScreenOn=false;
 
     private WeakReference <View> view;
     private EasyFloat() {
@@ -50,6 +59,10 @@ public class EasyFloat {
                 if(view!=null&&isActivityValid(activity)&&!isViewExist(activity)){
                     detachView(getView());
                     attachView(activity.getWindow(),getView(),SPUtils.getLatestPoint("view"));
+
+                    if(keepScreenOn){
+                        activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    }
                 }
             }
 
@@ -235,6 +248,14 @@ public class EasyFloat {
 
     public static void setOnlyValidActivityShow(boolean onlyValidActivityShow) {
         EasyFloat.onlyValidActivityShow = onlyValidActivityShow;
+    }
+
+    public static boolean isKeepScreenOn() {
+        return keepScreenOn;
+    }
+
+    public static void setKeepScreenOn(boolean keepScreenOn) {
+        EasyFloat.keepScreenOn = keepScreenOn;
     }
 
     public static void putData(String key, Object value){
