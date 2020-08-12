@@ -60,9 +60,17 @@ public class EasyFloat {
 
             @Override
             public void onActivityStarted(@NonNull Activity activity) {
-                if (view != null && view.get() != null && isActivityValid(activity) && !isViewExist(activity)) {
+                if (view != null && view.get() != null && isActivityValid(activity)) {
+                    if(isViewExist(activity)){
+                        boolean go=false;
+                        if(onFloatStateChanged!=null){
+                            go= onFloatStateChanged.onRestartShow(activity,view.get());
+                        }
+                        if(!go) return;
+                    }
+
                     if (onFloatStateChanged != null) {
-                        boolean intercept = onFloatStateChanged.beforeShow(activity, view.get());
+                        boolean intercept = onFloatStateChanged.onStartShow(activity, view.get());
                         if (intercept) return;
                     }
                     detachView(getView());
@@ -73,7 +81,7 @@ public class EasyFloat {
                     }
 
                     if (onFloatStateChanged != null) {
-                        onFloatStateChanged.afterShow(view.get());
+                        onFloatStateChanged.afterShow(activity,view.get());
                     }
                 }
             }
@@ -339,9 +347,11 @@ public class EasyFloat {
         /**
          * @return false 继续进行;true 拦截
          */
-        boolean beforeShow(Activity activity, View view);
+        boolean onStartShow(Activity activity, View view);
 
-        void afterShow(View view);
+        boolean onRestartShow(Activity activity, View view);
+
+        void afterShow(Activity activity, View view);
 
     }
 
