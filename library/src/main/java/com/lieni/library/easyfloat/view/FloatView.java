@@ -16,6 +16,7 @@ import com.lieni.library.easyfloat.R;
 
 public class FloatView extends FrameLayout {
     private int marginLeft,marginRight,marginTop,marginBottom;
+    private boolean alignParent=false;
 
     public FloatView(@NonNull Context context) {
         this(context,null);
@@ -40,6 +41,8 @@ public class FloatView extends FrameLayout {
         marginTop=typedArray.getLayoutDimension(R.styleable.FloatView_float_marginTop,verticalMargin);
         marginBottom=typedArray.getLayoutDimension(R.styleable.FloatView_float_marginBottom,verticalMargin);
 
+        alignParent=typedArray.getBoolean(R.styleable.FloatView_float_alignParent,false);
+
         typedArray.recycle();
         setClickable(true);
     }
@@ -49,35 +52,13 @@ public class FloatView extends FrameLayout {
     private boolean isDrag;
     private int parentHeight;
     private int parentWidth;
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
-    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         handleEvent(ev);
         return super.dispatchTouchEvent(ev);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
-    public boolean performClick() {
-        return super.performClick();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
 
     private void handleEvent(MotionEvent event){
         int rawX = (int) event.getRawX();
@@ -122,32 +103,44 @@ public class FloatView extends FrameLayout {
                 if (isDrag) {
                     //恢复按压效果
                     setPressed(false);
-                    boolean xLeftOver=getX()<marginLeft;
-                    boolean xRightOver=getX()>parentWidth-marginRight-getMeasuredWidth();
-                    boolean yTopOver=getY()<marginTop;
-                    boolean yBottomOver=getY()>parentHeight-marginBottom-getMeasuredHeight();
+                    boolean xLeftMove=getX()<marginLeft;
+                    boolean xRightMove=getX()>parentWidth-marginRight-getMeasuredWidth();
+                    boolean yTopMove=getY()<marginTop;
+                    boolean yBottomMove=getY()>parentHeight-marginBottom-getMeasuredHeight();
+                    
+                    if(alignParent){
+                        if(getX()<parentWidth/3.0){
+                            xLeftMove=true;
+                        }else{
+                            xRightMove=true;
+                        }
+                    }
 
-                    if (xLeftOver||xRightOver||yTopOver||yBottomOver ) {
+                    boolean autoMoveMove=xLeftMove||xRightMove||yTopMove||yBottomMove;
+
+                    if (autoMoveMove) {
                         //吸附
                         ViewPropertyAnimator animator= animate().setInterpolator(new DecelerateInterpolator()).setDuration(500);
-                        if(xLeftOver||xRightOver){
-                            if(xLeftOver) {
+                        if(xLeftMove||xRightMove){
+                            if(xLeftMove) {
                                 animator.x(marginLeft);
                             }
-                            if(xRightOver){
+                            if(xRightMove){
                                 animator.x(parentWidth-marginRight-getMeasuredWidth());
                             }
                         }
-                        if(yTopOver||yBottomOver){
-                            if(yTopOver){
+                        if(yTopMove||yBottomMove){
+                            if(yTopMove){
                                 animator.y(marginTop);
                             }
-                            if(yBottomOver){
+                            if(yBottomMove){
                                 animator.y(parentHeight-marginBottom-getMeasuredHeight());
                             }
                         }
                         animator.start();
                     }
+
+
                 }
                 break;
             default:
