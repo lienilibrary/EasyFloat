@@ -83,6 +83,11 @@ public class EasyFloat {
         int position=getInstance().getPosition(tag);
         if(position>-1) getInstance().list.remove(position);
     }
+    public static void removeImmediately(String tag){
+        int position=getInstance().getPosition(tag);
+        if(position>-1) getInstance().list.get(position).detach();
+        remove(tag);
+    }
 
     private static EasyFloat getInstance() {
         if (instance == null) {

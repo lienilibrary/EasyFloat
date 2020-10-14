@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.hideView).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                EasyFloat.removeImmediately("test1");
             }
         });
         findViewById(R.id.showDialog).setOnClickListener(new View.OnClickListener() {
