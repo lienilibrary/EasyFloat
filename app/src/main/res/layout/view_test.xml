@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:float_margin="40dp"
-    app:float_alignParent="true"
+    app:float_autoCloseToParent="true"
     android:background="@color/colorAccent"
     android:transitionName="shareElement"
     >

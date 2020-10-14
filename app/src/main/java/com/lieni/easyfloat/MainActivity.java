@@ -171,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
             public void onConfig() {
                 super.onConfig();
                 setInitPosition(200,200);
-                addInvalidActivityName(TestActivity.class.getSimpleName());
             }
         },this);
 
@@ -186,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
             public void onConfig() {
                 super.onConfig();
                 setInitPosition(400,400);
-                addInvalidActivityName(TestActivity.class.getSimpleName());
+                addInvalidActivityName(TestActivity.class.getName());
             }
         },this);
 

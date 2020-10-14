@@ -36,7 +36,7 @@ public abstract class EasyFloatView<T> {
     }
 
     public void onConfig() {
-        invalidActivityNames.add("GrantPermissionsActivity");
+        invalidActivityNames.add("com.android.packageinstaller.permission.ui.GrantpermissionsActivity");
     }
 
     public abstract View onCreateView(ViewGroup rootView);
@@ -91,15 +91,14 @@ public abstract class EasyFloatView<T> {
     public boolean isActivityValid(Activity activity) {
         if (onlyValidActivityShow) {
             for (String className : validActivityNames) {
-                if (className.equals(activity.getLocalClassName())) {
+                if (className.equals(activity.getComponentName().getClassName())) {
                     return true;
                 }
             }
             return false;
         } else {
             for (String className : invalidActivityNames) {
-                String activityName = activity.getLocalClassName();
-                if (className.equals(activityName)) {
+                if (className.equals(activity.getComponentName().getClassName())) {
                     return false;
                 }
             }
