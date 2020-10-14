@@ -16,7 +16,7 @@ import com.lieni.library.easyfloat.R;
 
 public class FloatView extends FrameLayout {
     private int marginLeft,marginRight,marginTop,marginBottom;
-    private boolean alignParent=false;
+    private boolean autoCloseToParent=false;
 
     public FloatView(@NonNull Context context) {
         this(context,null);
@@ -41,7 +41,7 @@ public class FloatView extends FrameLayout {
         marginTop=typedArray.getLayoutDimension(R.styleable.FloatView_float_marginTop,verticalMargin);
         marginBottom=typedArray.getLayoutDimension(R.styleable.FloatView_float_marginBottom,verticalMargin);
 
-        alignParent=typedArray.getBoolean(R.styleable.FloatView_float_alignParent,false);
+        autoCloseToParent=typedArray.getBoolean(R.styleable.FloatView_float_autoCloseToParent,false);
 
         typedArray.recycle();
         setClickable(true);
@@ -108,7 +108,7 @@ public class FloatView extends FrameLayout {
                     boolean yTopMove=getY()<marginTop;
                     boolean yBottomMove=getY()>parentHeight-marginBottom-getMeasuredHeight();
                     
-                    if(alignParent){
+                    if(autoCloseToParent){
                         if(getX()<parentWidth/3.0){
                             xLeftMove=true;
                         }else{

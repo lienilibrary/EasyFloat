@@ -10,6 +10,6 @@
         <attr name="float_marginHorizontal" format="dimension" />
         <attr name="float_marginVertical" format="dimension" />
         <attr name="float_margin" format="dimension" />
-        <attr name="float_alignParent" format="boolean" />
+        <attr name="float_autoCloseToParent" format="boolean" />
     </declare-styleable>
 </resources>
