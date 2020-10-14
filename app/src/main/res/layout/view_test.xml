@@ -4,7 +4,10 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:float_margin="40dp"
-    android:background="@color/colorAccent">
+    app:float_alignParent="true"
+    android:background="@color/colorAccent"
+    android:transitionName="shareElement"
+    >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
