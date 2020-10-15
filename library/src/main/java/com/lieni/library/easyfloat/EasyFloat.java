@@ -15,6 +15,7 @@ import java.util.List;
 public class EasyFloat {
     private static volatile EasyFloat instance;
     private List<EasyFloatView> list=new ArrayList<>();
+    private Application.ActivityLifecycleCallbacks callbacks;
 
     private int getPosition(String tag){
         for (int i=0;i<list.size();i++){
@@ -24,50 +25,56 @@ public class EasyFloat {
         }
         return -1;
     }
+    private void register(Application application){
+        if(callbacks==null){
+            callbacks=new Application.ActivityLifecycleCallbacks() {
+                @Override
+                public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+                }
+
+                @Override
+                public void onActivityStarted(@NonNull Activity activity) {
+                    List<EasyFloatView> data=getInstance().list;
+                    for (int i=0;i<data.size();i++){
+                        EasyFloatView view=data.get(i);
+                        if(view.isActivityValid(activity)) view.attachToRoot(activity);
+                    }
+                }
+
+                @Override
+                public void onActivityResumed(@NonNull Activity activity) {
+
+                }
+
+                @Override
+                public void onActivityPaused(@NonNull Activity activity) {
+
+                }
+
+                @Override
+                public void onActivityStopped(@NonNull Activity activity) {
+                    for (int i=0;i<getInstance().list.size();i++){
+                        EasyFloatView view=getInstance().list.get(i);
+                        if(view.isActivityValid(activity)) view.detach(activity);
+                    }
+                }
+
+                @Override
+                public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+
+                }
+
+                @Override
+                public void onActivityDestroyed(@NonNull Activity activity) {
+                }
+            };
+            application.registerActivityLifecycleCallbacks(callbacks);
+        }
+    }
 
     public static void init(Application application){
         SPUtils.init(application);
-        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
-            }
-
-            @Override
-            public void onActivityStarted(@NonNull Activity activity) {
-                List<EasyFloatView> data=getInstance().list;
-                for (int i=0;i<data.size();i++){
-                    EasyFloatView view=data.get(i);
-                    if(view.isActivityValid(activity)) view.attachToRoot(activity);
-                }
-            }
-
-            @Override
-            public void onActivityResumed(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityPaused(@NonNull Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityStopped(@NonNull Activity activity) {
-                for (int i=0;i<getInstance().list.size();i++){
-                    EasyFloatView view=getInstance().list.get(i);
-                    if(view.isActivityValid(activity)) view.detach(activity);
-                }
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
-
-            }
-
-            @Override
-            public void onActivityDestroyed(@NonNull Activity activity) {
-            }
-        });
+        getInstance().register(application);
     }
     public static void add(String tag,EasyFloatView easyFloatView){
         easyFloatView.setTag(tag);

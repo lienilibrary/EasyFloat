@@ -13,8 +13,10 @@ public class SPUtils {
     }
 
     public static void init(Context context){
-        SharedPreferences sharedPreferences=context.getSharedPreferences("EasyFloat", Context.MODE_PRIVATE);
-        instance=new SPUtils(sharedPreferences);
+        if(instance==null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("EasyFloat", Context.MODE_PRIVATE);
+            instance = new SPUtils(sharedPreferences);
+        }
     }
 
     public static Point getLatestPoint(String tag){
