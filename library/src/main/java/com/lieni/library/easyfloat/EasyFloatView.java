@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class EasyFloatView<T> {
-    T customData;
+    private T data;
     //已显示的时候不熄屏
     private boolean keepScreenOn = false;
     private String tag = "EasyFloatView";
@@ -31,8 +31,13 @@ public abstract class EasyFloatView<T> {
 
     private Point positionPoint;
 
-    public EasyFloatView() {
+    public EasyFloatView(T data) {
+        this.data=data;
         onConfig();
+    }
+
+    public EasyFloatView(){
+        this(null);
     }
 
     public void onConfig() {
@@ -44,10 +49,6 @@ public abstract class EasyFloatView<T> {
 
     public void onDestroyView() {
 
-    }
-
-    public View getView() {
-        return view;
     }
 
     public void attachToRoot(Activity activity) {
@@ -144,12 +145,36 @@ public abstract class EasyFloatView<T> {
         invalidActivityNames.remove(name);
     }
 
+    public void addValidActivityName(String name) {
+        validActivityNames.add(name);
+    }
+
+    public void removeValidActivityName(String name) {
+        validActivityNames.remove(name);
+    }
+
     public boolean isKeepScreenOn() {
         return keepScreenOn;
     }
 
     public void setKeepScreenOn(boolean keepScreenOn) {
         this.keepScreenOn = keepScreenOn;
+    }
+
+    public View getView() {
+        return view;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public void setOnlyValidActivityShow(boolean onlyValidActivityShow) {
+        this.onlyValidActivityShow = onlyValidActivityShow;
     }
 
     public void setInitPosition(int x, int y) {
