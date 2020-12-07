@@ -1,7 +1,7 @@
 # Download
 
 ```
-implementation 'com.github.lienilibrary:EasyFloat:1.0.2'
+implementation 'com.github.lienilibrary:EasyFloat:1.2.6'
 ```
 
 
