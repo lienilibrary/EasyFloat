@@ -40,14 +40,43 @@ public abstract class EasyFloatView<T> {
         this(null);
     }
 
+    /**
+     * used to config default data,such as addInvalidActivityName(),setInitPosition() and so on
+     * @see #addInvalidActivityName(String)
+     * @see #setInitPosition(int, int)
+     */
     public void onConfig() {
         invalidActivityNames.add("com.android.packageinstaller.permission.ui.GrantpermissionsActivity");
     }
 
+    /**
+     * it will be running when view is attached to activity
+     */
     public abstract View onCreateView(ViewGroup rootView);
 
 
+    /**
+     * it will be running when view is detached from activity
+     */
     public void onDestroyView() {
+
+    }
+
+    /**
+     * it will be running when you invoke add() or addImmediately()
+     * @see EasyFloat#add(String, EasyFloatView)
+     * @see EasyFloat#addImmediately(String, EasyFloatView, Activity)
+     */
+    public void onAdd(){
+
+    }
+
+    /**
+     * it will be running when you invoke remove() or removeImmediately()
+     * @see EasyFloat#remove(String)
+     * @see EasyFloat#removeImmediately(String)
+     */
+    public void onRemove(){
 
     }
 

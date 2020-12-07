@@ -78,6 +78,7 @@ public class EasyFloat {
     }
     public static void add(String tag,EasyFloatView easyFloatView){
         easyFloatView.setTag(tag);
+        easyFloatView.onAdd();
         getInstance().list.add(easyFloatView);
     }
     public static void addImmediately(String tag,EasyFloatView easyFloatView,Activity activity){
@@ -88,7 +89,10 @@ public class EasyFloat {
     }
     public static void remove(String tag){
         int position=getInstance().getPosition(tag);
-        if(position>-1) getInstance().list.remove(position);
+        if(position>-1) {
+            getInstance().list.get(position).onRemove();
+            getInstance().list.remove(position);
+        }
     }
     public static void removeImmediately(String tag){
         int position=getInstance().getPosition(tag);
